@@ -1,5 +1,3 @@
-import java.io.FileNotFoundException
-import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
 // val input =
@@ -26,62 +24,55 @@ import scala.io.Source
 val fileName = "2021/04.txt"
 val input = Source.fromFile(fileName).getLines().mkString("\n")
 
-case class Board(
-    grid: Array[Array[Int]],
-    seen: collection.mutable.Map[String, ListBuffer[Int]]
-)
+case class Square(value:Int, seen:Boolean)
+class Board(var values: Array[Array[Square]]):
+    def play(draw:Int) : Board = {
+      this match {
+        case _: WinningBoard => this
+        case _ => {
+          val newBoard = Board(values.flatten.map(s => Square(s.value, s.seen || s.value == draw)).grouped(5).toArray)
+          newBoard.hasBingo match {
+            case true => WinningBoard(newBoard.values, draw)
+            case false => newBoard
+          } 
+        }  
+      }    
+    }
+    var hasBingo : Boolean = {
+      val allSeen = (a:Array[Square]) => a.forall(_.seen)
+      values.exists(allSeen) || values.transpose.exists(allSeen)
+    }
+class WinningBoard(values: Array[Array[Square]], var winningDraw: Int) extends Board(values) {
+  var score:Int = {
+    values.flatten.filter(s=>s.seen == false).map(s => s.value).sum * winningDraw
+  }
+}
+
 val r = """[\n\r\s]+""".r
 
 val rawDraws :: rawBoards = input.split("\n\n").toList
-
 val draws = rawDraws.split(",").map { _.toInt }.toList
-val boards = rawBoards.map(s => {
-  val items = r.split(s.trim).map { _.toInt }.toArray
-  val rows = items.sliding(5, 5).toArray
-  Board(
-    rows,
-    collection.mutable.Map
-      .WithDefault(collection.mutable.Map(), k => ListBuffer())
-  )
-//   rows ::: rows.transpose
-})
 
-boards(0).grid.toList.map { _.toList }
+val boards = rawBoards
+  .map(s => {
+    Board(r.split(s.trim).map( x => { Square(x.toInt, false) }).grouped(5).toArray)
+  })
 
-def PlayBingo(boards: List[Board], draws: List[Int]): Option[(Int, Board)] = {
-  draws.foreach { n =>
-    boards.foreach { b =>
-      b.grid.zipWithIndex
-        .foreach {
-          case (row, r) => {
-            row.zipWithIndex
-              .foreach {
-                case (cell, c) => {
-                  if (cell != 0 && cell == n) {
-                    println(s"r$r:c$c = $cell. Target=$n")
-                    val kr = "r" + r.toString
-                    val kc = "c" + c.toString
 
-                    b.seen(kr) = b.seen(kr) += cell
-                    b.seen(kc) = b.seen(kc) += cell
-
-                    b.grid(r)(c) = 0
-
-                    if (b.seen(kr).length == 5 || b.seen(kc).length == 5) {
-                      return Some((n, b))
-                    }
-                  }
-                }
-              }
-          }
-        }
-    }
+def PlayNext(boards:(List[Board],List[WinningBoard]), draws:List[Int]) : (List[Board],List[WinningBoard]) = {
+  val draw :: remainingDraws = draws
+  val nextBoards = boards._1.map(_.play(draw))
+  val winners = boards._2
+  val (newWinners, remainingBoards) = nextBoards.partition{case x: WinningBoard => true case _ => false}
+  val result = (remainingBoards, winners:::(newWinners.map(_.asInstanceOf[WinningBoard])))
+  if (remainingBoards.length == 0 || remainingDraws.length == 0){
+    result
+  } else {
+    PlayNext(result, remainingDraws)
   }
-  return None
 }
 
-boards(0)
-val result = PlayBingo(boards, draws)
-result match {
-  case Some(n, board) => board.grid.map(_.sum).sum * n
-}
+val (_, winners) = PlayNext((boards, List[WinningBoard]()), draws)
+
+val part1 = winners.head.score
+val part2 = winners.last.score
