@@ -1,29 +1,5 @@
 import scala.io.Source
 
-// val input =
-//   """7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
-//     |
-//     |22 13 17 11  0
-//     | 8  2 23  4 24
-//     |21  9 14 16  7
-//     | 6 10  3 18  5
-//     | 1 12 20 15 19
-//     |
-//     | 3 15  0  2 22
-//     | 9 18 13 17  5
-//     |19  8  7 25 23
-//     |20 11 10 24  4
-//     |14 21 16 12  6
-//     |
-//     |14 21 17 24  4
-//     |10 16 15  9 19
-//     |18  8 23 26 20
-//     |22 11 13  6  5
-//     | 2  0 12  3  7""".stripMargin
-
-val fileName = "2021/04.txt"
-val input = Source.fromFile(fileName).getLines().mkString("\n")
-
 case class Square(value:Int, seen:Boolean)
 class Board(var values: Array[Array[Square]]):
     def play(draw:Int) : Board = {
@@ -44,20 +20,9 @@ class Board(var values: Array[Array[Square]]):
     }
 class WinningBoard(values: Array[Array[Square]], var winningDraw: Int) extends Board(values) {
   var score:Int = {
-    values.flatten.filter(s=>s.seen == false).map(s => s.value).sum * winningDraw
+    values.flatten.filter(!_.seen).map(_.value).sum * winningDraw
   }
 }
-
-val r = """[\n\r\s]+""".r
-
-val rawDraws :: rawBoards = input.split("\n\n").toList
-val draws = rawDraws.split(",").map { _.toInt }.toList
-
-val boards = rawBoards
-  .map(s => {
-    Board(r.split(s.trim).map( x => { Square(x.toInt, false) }).grouped(5).toArray)
-  })
-
 
 def PlayNext(boards:(List[Board],List[WinningBoard]), draws:List[Int]) : (List[Board],List[WinningBoard]) = {
   val draw :: remainingDraws = draws
@@ -71,6 +36,18 @@ def PlayNext(boards:(List[Board],List[WinningBoard]), draws:List[Int]) : (List[B
     PlayNext(result, remainingDraws)
   }
 }
+
+val fileName = "2021/04.txt"
+val input = Source.fromFile(fileName).getLines().mkString("\n")
+val r = """[\n\r\s]+""".r
+
+val rawDraws :: rawBoards = input.split("\n\n").toList
+val draws = rawDraws.split(",").map { _.toInt }.toList
+
+val boards = rawBoards
+  .map(s => {
+    Board(r.split(s.trim).map( x => { Square(x.toInt, false) }).grouped(5).toArray)
+  })
 
 val (_, winners) = PlayNext((boards, List[WinningBoard]()), draws)
 
