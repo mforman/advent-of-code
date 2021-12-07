@@ -13,7 +13,13 @@ var input =
 var a = input.min
 var b = input.max
 
-(a to b)
+val part1 = (a to b)
+  .map(n => {
+    input.map { x => (x - n).abs }.sum
+  })
+  .min
+
+val part2 = (a to b)
   .map(n => {
     input
       .map(x => {
