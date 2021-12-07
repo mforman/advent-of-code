@@ -13,6 +13,8 @@ project/**/metals.sbt
 !.vscode/extensions.json
 *.code-workspace
 
+*.txt
+
 # End of https://www.toptal.com/developers/gitignore/api/vscode,scala,metals,python
 
 cookie
