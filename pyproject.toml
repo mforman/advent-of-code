@@ -5,10 +5,11 @@ description = ""
 authors = ["Michael Forman <mforman@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.12"
 black = "^21.12b0"
-jupyter = "^1.0.0"
+jupyterlab = "^4.0.0"
 flake8 = "^4.0.1"
+advent-of-code-data = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
 
