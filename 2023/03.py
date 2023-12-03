@@ -3,6 +3,8 @@ import aocd
 import argparse
 import logging
 import itertools
+import math
+from collections import defaultdict
 from dataclasses import dataclass
 from typing_extensions import Iterator
 
@@ -59,7 +61,7 @@ def FindNumbers(input:list[str]) -> Iterator[Number]:
                 yield num
                 num = Number()
 
-def IsPart(grid:list[str], b:Number) -> bool:
+def IsPart(grid:list[str], b:Number) -> None | tuple[str, tuple[int, int]]:
     logging.debug("Checking %s", b)
     num_rows, num_cols = GetBounds(grid)
 
@@ -80,9 +82,9 @@ def IsPart(grid:list[str], b:Number) -> bool:
             continue
         else:
             logging.debug("%s on row %s is a part because %s is at (%s,%s)", b.num(), b.row, elem, r, c)
-            return True
+            return (elem, (r,c))
     logging.debug("%s on row %s is not a part", b.num(), b.row)
-    return False
+    return None
 
 sample = """
 467..114..
@@ -97,12 +99,32 @@ sample = """
 .664.598..
 """.strip().splitlines()
 
-def GetPartTotal(grid) -> int:
+def Part1(grid) -> int:
     nums = FindNumbers(grid)
     parts = [n.num() for n in nums if IsPart(grid, n)]
     return sum(parts)
 
-assert GetPartTotal(sample) == 4361
+assert Part1(sample) == 4361
+
+def Part2(grid) -> int:
+    d = defaultdict(list[int])
+    nums = FindNumbers(grid)
+    for n in nums:
+        part = IsPart(grid, n)
+        if not part:
+            continue
+        elem, point = part
+        if elem != "*":
+            continue
+        d[point].append(n.num())
+
+    gears = {k: v for k,v in d.items() if len(v) == 2}
+    logging.debug("\n-------------------\nGears\n%s", gears)
+
+    return sum([math.prod(v) for v in gears.values()])
+
+assert Part2(sample) == 467835
 
 input:list[str] = aocd.get_data(day=3, year=2023).splitlines()
-print(f"Part 1 {GetPartTotal(input)}")
+print(f"Part 1 {Part1(input)}")
+print(f"Part 2 {Part2(input)}")
