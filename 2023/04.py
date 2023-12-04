@@ -2,6 +2,7 @@ import aocd
 
 import argparse
 import logging
+import time
 from collections import defaultdict
 
 from aocd.models import count
@@ -90,5 +91,15 @@ assert Part2(sample) == 30
 
 input:list[str] = aocd.get_data(day=4, year=2023).splitlines()
 
-print(f"Part 1: {Part1(input)}")
-print(f"Part 2: {Part2(input)}")
+p1_start = time.perf_counter_ns()
+p1 = Part1(input)
+p1_end = time.perf_counter_ns()
+p1_dur = (p1_end - p1_start) / 1_000_000
+
+p2_start = time.perf_counter_ns()
+p2 = Part2(input)
+p2_end = time.perf_counter_ns()
+p2_dur = (p2_end - p2_start) / 1_000_000
+
+print(f"\x1b[1mPart 1: {p1}\x1B[0m \x1B[3m{p1_dur:.3f} ms\x1B[0m")
+print(f"\x1b[1mPart 2: {p2}\x1B[0m \x1B[3m{p2_dur:.3f} ms\x1B[0m")
