@@ -1,0 +1,7 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "/Users/melvin/.nuget/packages"
+    ]
+  }
+}
