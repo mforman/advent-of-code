@@ -9,6 +9,9 @@ def is_safe(report: List[int], allowed:int = 0) -> bool:
     decreasing = report[0] > report[1]
     failures = 0
     for a,b in items:
+        if failures > allowed:
+            return False
+        
         if decreasing and a <= b:
             failures = failures + 1
             continue
@@ -21,8 +24,6 @@ def is_safe(report: List[int], allowed:int = 0) -> bool:
             failures = failures + 1
             continue
 
-        if failures > allowed:
-            return False
     return failures <= allowed
 
 def part1(reports: List[List[int]]) -> int:
